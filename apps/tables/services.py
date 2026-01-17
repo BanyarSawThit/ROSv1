@@ -7,11 +7,12 @@ from django.core import signing
 
 def generate_table_qr_code(table):
     signed_table_id = signing.dumps({"table_id": table.id})
+    print('signing dump method',signed_table_id)
 
     path=reverse("orders:start", args=[signed_table_id])
-    print(path)
+    print('path',path)
     qr_url = f"{settings.SITE_URL}{path}"
-    print(qr_url)
+    print('qrcode to be',qr_url)
 
     qr = qrcode.make(qr_url)
     buffer = BytesIO()
