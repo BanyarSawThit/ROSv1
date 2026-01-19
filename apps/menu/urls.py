@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path
 from apps.menu.views import MenuListView
 
 app_name = 'menu'
