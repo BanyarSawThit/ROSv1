@@ -9,6 +9,7 @@ def add_to_cart(session, item):
 
     if item_id not in cart:
         cart[item_id] = {
+            "id": item_id,
             "name": item.name,
             "price": item_price,
             "quantity": 1
