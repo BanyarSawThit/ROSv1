@@ -1,23 +1,79 @@
 {% extends "base.html" %}
-
 {% block title %} Cart {% endblock %}
-
 {% block content %}
 
-    <h2> {{ table }} </h2> <br>
+<h2>Cart</h2>
 
-    {% if cart %}
-        {% for item in cart.values %}
-            <div>
-                <p>{{ item.name }}</p>
-                <p>{{ item.price }}</p>
-                <p>Qty: {{ item.quantity }}</p>
-                <p>Subtotal: {{ item.subtotal }}</p>
-            </div>
-            <hr>
+    <p><strong>{{ table }}</strong></p>
+
+{% if cart %}
+    <table border="1" cellpadding="8" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Price</th>
+                <th style="width: 120px;">Quantity</th>
+                <th>Subtotal</th>
+                <th style="width: 120px;">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for item in cart %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.price }}</td>
+                <!-- Update quantity -->
+                <td>
+                    <form method="post" action="{% url 'cart:update_quantity' item_id=item.id %}">
+                        {% csrf_token %}
+                        <input
+                            type="number"
+                            name="quantity"
+                            value="{{ item.quantity }}"
+                            min="0"
+                            style="width: 60px;"
+                        >
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+
+                <td>{{ item.subtotal }}</td>
+
+                <!-- Remove item -->
+                <td>
+                    <form method="post" action="{% url 'cart:remove_from_cart' item_id=item.id %}">
+                        {% csrf_token %}
+                        <button type="submit">Remove</button>
+                    </form>
+                </td>
+            </tr>
         {% endfor %}
-    {% else %}
-        <p>Your cart is empty.</p>
-    {% endif %}
+        </tbody>
+    </table>
+
+    <br>
+
+    <h3>Total: {{ total }}</h3>
+
+    <br>
+
+    <!-- Cart-level actions -->
+    <form method="post" action="{% url 'cart:clear_cart' %}">
+        {% csrf_token %}
+        <button type="submit">Clear Cart</button>
+    </form>
+
+    <br>
+
+    <!-- Placeholder for next phase -->
+    <form method="POST" action="{% url 'orders:place_order' %}">
+        {% csrf_token %}
+        <button type="submit">Confirm Order</button>
+    </form>
+
+{% else %}
+    <p>Your cart is empty.</p>
+{% endif %}
 
 {% endblock %}
