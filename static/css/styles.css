@@ -10,6 +10,12 @@
  * Copyright 2011-2022 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
+
+/* Add padding to the body or main content to prevent the fixed footer from overlapping content */
+body {
+  padding-bottom: [footer-height];
+}
+
 :root {
   --bs-blue: #0d6efd;
   --bs-indigo: #6610f2;

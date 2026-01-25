@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Order History{% endblock %}
+
+{% block content %}
+    <h2>Your Order History</h2>
+
+    {% for order in orders %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>Order #{{ order.id }}</h5>
+                <p>Status: {{ order.get_status_display }}</p>
+
+
+                 <ul class="list-group mb-4">
+                    {% for item in order.items.all %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>{{ item.item.name }} × {{ item.quantity }}</span>
+                            <span>฿{{ item.subtotal }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <p>Total: ฿{{ order.total_price }}</p>
+            </div>
+        </div>
+    {% empty %}
+        <p>No orders yet.</p>
+    {% endfor %}
+
+{% endblock %}
+
+<!--{% url 'orders:details' order.id %}-->

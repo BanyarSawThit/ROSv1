@@ -1,15 +1,15 @@
 #orders/views
+from decimal import Decimal
+
 from django.shortcuts import render
 from django.core import signing
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.http import require_POST
 from django.db import transaction
-from apps.cart import services as cart_services
 
-from apps.cart.services import delete_cart
+from apps.cart import services as cart_services
 from apps.orders.models import OrderItem, Order
 from apps.tables.models import Table
-from apps.menu.models import MenuItem
 
 
 def start_order(request, signed_table_id):
@@ -34,17 +34,51 @@ def place_order(request):
         order = Order.objects.create(
             table = table,
             status = "pending",
+            total_price = Decimal("0.00")
         )
 
         for item in items:
             OrderItem.objects.create(
                 order=order,
                 item_id = item['id'],
-                price = item['price'],
+                price = Decimal(item['price']),
                 quantity = item['quantity'],
-                subtotal = item['subtotal'],
             )
-        print(OrderItem.item)
-        delete_cart(request.session)
+        order.calculate_total()
+        cart_services.delete_cart(request.session)
+        request.session['last_order_id'] = order.pk
+    return redirect('orders:success')
 
-    return redirect('cart:details')
+
+def order_success(request):
+    order_id = request.session.get('last_order_id')
+
+    if not order_id:
+        return redirect('menu:list')
+
+    order = get_object_or_404(Order, id=order_id)
+
+    context = {
+        'order': order
+    }
+    return render(request, 'orders/success.html', context)
+
+
+def order_history(request):
+    table_id = request.session.get('table_id')
+
+    if not table_id:
+        return redirect('menu:list')
+
+    # here filtering by status is not the right way i think. maybe like not "paid"?
+    orders = (
+        Order.objects
+        .filter(table=table_id)
+        .order_by('-created_at')
+        .prefetch_related('items', 'items__item')
+    )
+
+    context = {
+        'orders': orders,
+    }
+    return render(request, 'orders/history.html', context)
