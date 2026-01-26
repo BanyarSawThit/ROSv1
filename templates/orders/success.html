@@ -20,7 +20,7 @@
         {% endfor %}
     </ul>
 
-    <h5>Total: ฿{{ order.total_price }}</h5>
+    <div style="text-align: right"><h5>Total: ฿{{ order.total_price }}</h5></div>
 
     <div class="mt-4">
         <a href="{% url 'menu:list' %}" class="btn btn-outline-primary">
