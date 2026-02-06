@@ -1,3 +1,5 @@
+# tables/services.py
+
 import qrcode
 from io import BytesIO
 from django.core.files.base import ContentFile
@@ -9,7 +11,7 @@ def generate_table_qr_code(table):
     signed_table_id = signing.dumps({"table_id": table.id})
     print('signing dump method',signed_table_id)
 
-    path=reverse("orders:start", args=[signed_table_id])
+    path=reverse("tables:start", args=[signed_table_id])
     print('path',path)
     qr_url = f"{settings.SITE_URL}{path}"
     print('qrcode to be',qr_url)
