@@ -1,79 +1,262 @@
 {% extends "base.html" %}
-{% block title %} Cart {% endblock %}
+
+{% block title %}Cart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .cart-title {
+        font-size: 2rem;
+    }
+
+    .cart-items {
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .cart-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+
+    .cart-item-name {
+        flex: 1;
+        font-weight: 600;
+    }
+
+    .cart-item-price {
+        color: #666;
+        margin-right: 1rem;
+    }
+
+    .cart-item-quantity {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-right: 1rem;
+    }
+
+    .cart-item-quantity input {
+        width: 60px;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        text-align: center;
+        font-size: 1rem;
+    }
+
+    .cart-item-quantity button {
+        padding: 0.5rem 0.75rem;
+        background-color: #333;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    .cart-item-quantity button:hover {
+        background-color: #555;
+    }
+
+    .cart-item-subtotal {
+        font-weight: bold;
+        min-width: 80px;
+        text-align: right;
+    }
+
+    .cart-item-remove {
+        margin-left: 1rem;
+    }
+
+    .remove-btn {
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.875rem;
+    }
+
+    .remove-btn:hover {
+        background-color: #c82333;
+    }
+
+    .cart-summary {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .cart-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+    }
+
+    .cart-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .cart-actions .btn {
+        flex: 1;
+        min-width: 150px;
+        text-align: center;
+    }
+
+    .empty-cart {
+        text-align: center;
+        padding: 3rem 1rem;
+        background: #fff;
+        border-radius: 8px;
+    }
+
+    .empty-cart-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .empty-cart-text {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Mobile Layout */
+    @media (max-width: 768px) {
+        .cart-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .cart-item-name {
+            width: 100%;
+        }
+
+        .cart-item-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .cart-item-quantity input {
+            width: 50px;
+        }
+
+        .cart-item-subtotal {
+            min-width: auto;
+        }
+
+        .cart-item-remove {
+            width: 100%;
+            margin-left: 0;
+        }
+
+        .remove-btn {
+            width: 100%;
+        }
+
+        .cart-actions {
+            flex-direction: column;
+        }
+
+        .cart-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-
-<h2>Cart</h2>
-
-    <p><strong>{{ table }}</strong></p>
+<div class="cart-header">
+    <h1 class="cart-title">Your Cart</h1>
+</div>
 
 {% if cart %}
-    <table border="1" cellpadding="8" cellspacing="0" width="100%">
-        <thead>
-            <tr>
-                <th>Item</th>
-                <th>Price</th>
-                <th style="width: 120px;">Quantity</th>
-                <th>Subtotal</th>
-                <th style="width: 120px;">Actions</th>
-            </tr>
-        </thead>
-
-        <tbody>
+    <div class="cart-items">
         {% for item in cart %}
-            <tr>
-                <td>{{ item.name }}</td>
-                <td>{{ item.price }}</td>
-                <!-- Update quantity -->
-                <td>
-                    <form method="post" action="{% url 'cart:update_quantity' item_id=item.id %}">
+        <div class="cart-item">
+            <div class="cart-item-name">{{ item.name }}</div>
+
+            <div class="cart-item-details">
+                <div class="cart-item-price">฿{{ item.price }}</div>
+
+                <div class="cart-item-quantity">
+                    <form method="post" action="{% url 'cart:update_quantity' item_id=item.id %}" style="display: flex; gap: 0.5rem; align-items: center;">
                         {% csrf_token %}
                         <input
                             type="number"
                             name="quantity"
                             value="{{ item.quantity }}"
-                            min="0"
-                            style="width: 60px;"
+                            min="1"
+                            max="99"
                         >
                         <button type="submit">Update</button>
                     </form>
-                </td>
+                </div>
 
-                <td>{{ item.subtotal }}</td>
+                <div class="cart-item-subtotal">฿{{ item.subtotal }}</div>
+            </div>
 
-                <!-- Remove item -->
-                <td>
-                    <form method="post" action="{% url 'cart:remove_from_cart' item_id=item.id %}">
-                        {% csrf_token %}
-                        <button type="submit">Remove</button>
-                    </form>
-                </td>
-            </tr>
+            <div class="cart-item-remove">
+                <form method="post" action="{% url 'cart:remove_from_cart' item_id=item.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="remove-btn">Remove</button>
+                </form>
+            </div>
+        </div>
         {% endfor %}
-        </tbody>
-    </table>
+    </div>
 
-    <br>
+    <div class="cart-summary">
+        <div class="cart-total">
+            <span>Total:</span>
+            <span>฿{{ total }}</span>
+        </div>
 
-    <h3>Total: {{ total }}</h3>
+        <div class="cart-actions">
+            <form method="post" action="{% url 'cart:clear_cart' %}" style="flex: 1;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary" style="width: 100%;">
+                    Clear Cart
+                </button>
+            </form>
 
-    <br>
-
-    <!-- Cart-level actions -->
-    <form method="post" action="{% url 'cart:clear_cart' %}">
-        {% csrf_token %}
-        <button type="submit">Clear Cart</button>
-    </form>
-
-    <br>
-
-    <!-- Placeholder for next phase -->
-    <form method="POST" action="{% url 'orders:place_order' %}">
-        {% csrf_token %}
-        <button type="submit">Confirm Order</button>
-    </form>
-
+            <form method="post" action="{% url 'orders:place_order' %}" style="flex: 1;">
+                {% csrf_token %}
+                <button type="submit" class="btn" style="width: 100%;">
+                    Confirm Order
+                </button>
+            </form>
+        </div>
+    </div>
 {% else %}
-    <p>Your cart is empty.</p>
+    <div class="empty-cart">
+        <div class="empty-cart-icon">🛒</div>
+        <div class="empty-cart-text">Your cart is empty</div>
+        <a href="{% url 'menu:list' %}" class="btn">Browse Menu</a>
+    </div>
 {% endif %}
-
 {% endblock %}

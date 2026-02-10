@@ -1,12 +1,20 @@
 # cart/views
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from apps.cart import services
 from apps.menu.models import MenuItem
+from apps.tables.models import DiningSession
+from apps.tables.utils import validate_dining_session
 
 
 # item names, prices, quantity, subs, totals
 def cart_details(request):
+    dining_session, redirect_response = validate_dining_session(request)
+
+    if redirect_response:
+        return redirect_response
+
     summary = services.cart_summary(request.session)
     context = {
         "cart": summary['items'],

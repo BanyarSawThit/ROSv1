@@ -1,29 +1,166 @@
 {% extends "base.html" %}
 
-{% block title %} Menu {% endblock %}
+{% block title %}Menu{% endblock %}
+
+{% block extra_css %}
+<style>
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .menu-item {
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .menu-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .menu-item img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .menu-item-info {
+        padding: 1rem;
+    }
+
+    .menu-item-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .menu-item-price {
+        font-size: 1.25rem;
+        color: #28a745;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    .add-to-cart-form {
+        margin: 0;
+    }
+
+    .add-to-cart-btn {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #333;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background-color 0.2s;
+    }
+
+    .add-to-cart-btn:hover {
+        background-color: #555;
+    }
+
+    .add-to-cart-btn:active {
+        background-color: #222;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+        .menu-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .menu-item img {
+            height: 150px;
+        }
+
+        .menu-item-info {
+            padding: 0.75rem;
+        }
+
+        .menu-item-name {
+            font-size: 0.95rem;
+        }
+
+        .menu-item-price {
+            font-size: 1.1rem;
+        }
+    }
+
+    .page-title {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        color: #666;
+        margin-bottom: 1rem;
+    }
+
+    /* Success message after adding to cart */
+    .success-message {
+        background-color: #d4edda;
+        color: #155724;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        display: none;
+    }
+
+    .success-message.show {
+        display: block;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-        <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
-            {% for item in items %}
-                <div class="col mb-5">
-                    <div class="card h-100">
-                        <!-- Product image-->
-                        <img class="card-img-top" src="{{ item.image.url }}" alt="{{ item.name }}" />
-                        <!-- Product details-->
-                        <div class="card-body p-4">
-                            <div class="text-center">
-                                <!-- Product name-->
-                                <h5 class="fw-bolder">{{ item.name }}</h5>
-                                <!-- Product price-->
-                                ฿{{ item.price }}
-                            </div>
-                        </div>
-                        <!-- Product actions-->
-                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                            <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="{% url 'cart:add_to_cart' item_id=item.pk %}">Add to cart</a></div>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+<div id="success-msg" class="success-message">
+    ✓ Item added to cart!
+</div>
+
+<h1 class="page-title">Our Menu</h1>
+<p class="page-subtitle">Choose your favorites</p>
+
+<div class="menu-grid">
+    {% for item in items %}
+    <div class="menu-item">
+        <img src="{{ item.image.url }}" alt="{{ item.name }}">
+        <div class="menu-item-info">
+            <div class="menu-item-name">{{ item.name }}</div>
+            <div class="menu-item-price">฿{{ item.price }}</div>
+
+            <form method="get" action="{% url 'cart:add_to_cart' item_id=item.pk %}" class="add-to-cart-form">
+                <button type="submit" class="add-to-cart-btn">
+                    Add to Cart
+                </button>
+            </form>
         </div>
+    </div>
+    {% empty %}
+    <p>No items available at the moment.</p>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Show success message if we just added an item
+    // This is a simple approach - we'll check the URL or use sessions later
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('added') === 'true') {
+        const msg = document.getElementById('success-msg');
+        msg.classList.add('show');
+        setTimeout(() => {
+            msg.classList.remove('show');
+        }, 3000);
+    }
+</script>
 {% endblock %}

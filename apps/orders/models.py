@@ -4,13 +4,14 @@ from decimal import Decimal
 from django.db import models
 
 from apps.core.models import TimeStampedModel
-from apps.tables.models import Table
+from apps.tables.models import Table, DiningSession
 from apps.menu.models import MenuItem
 
 
 class Order(TimeStampedModel):
     objects = models.Manager()
     table = models.ForeignKey(Table, on_delete=models.PROTECT)
+    dining_session = models.ForeignKey(DiningSession, on_delete=models.PROTECT)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(
         max_length=20,

@@ -1,32 +1,191 @@
 {% extends "base.html" %}
+
 {% block title %}Order History{% endblock %}
 
-{% block content %}
-    <h2>Your Order History</h2>
+{% block extra_css %}
+<style>
+    .history-header {
+        margin-bottom: 2rem;
+    }
 
-    {% for order in orders %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5>Order #{{ order.id }}</h5>
-                <p>Status: {{ order.get_status_display }}</p>
+    .history-title {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
 
+    .history-subtitle {
+        color: #666;
+    }
 
-                 <ul class="list-group mb-4">
-                    {% for item in order.items.all %}
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>{{ item.item.name }} × {{ item.quantity }}</span>
-                            <span>฿{{ item.subtotal }}</span>
-                        </li>
-                    {% endfor %}
-                </ul>
+    .order-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
 
-                <p>Total: ฿{{ order.total_price }}</p>
-            </div>
-        </div>
-    {% empty %}
-        <p>No orders yet.</p>
-    {% endfor %}
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
 
+    .order-id {
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .order-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .order-status.pending {
+        background-color: #ffc107;
+        color: #000;
+    }
+
+    .order-status.preparing {
+        background-color: #17a2b8;
+        color: #fff;
+    }
+
+    .order-status.done {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+    .order-status.paid {
+        background-color: #6c757d;
+        color: #fff;
+    }
+
+    .order-items {
+        margin-bottom: 1rem;
+    }
+
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+    }
+
+    .order-item-name {
+        flex: 1;
+    }
+
+    .order-item-quantity {
+        color: #666;
+        margin: 0 1rem;
+    }
+
+    .order-item-price {
+        font-weight: 600;
+    }
+
+    .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+    }
+
+    .order-date {
+        color: #666;
+        font-size: 0.875rem;
+    }
+
+    .order-total {
+        font-size: 1.25rem;
+        font-weight: bold;
+    }
+
+    .empty-history {
+        text-align: center;
+        padding: 3rem 1rem;
+        background: #fff;
+        border-radius: 8px;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .empty-text {
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .order-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .order-item {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .order-item-quantity {
+            margin: 0;
+        }
+
+        .order-footer {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+    }
+</style>
 {% endblock %}
 
-<!--{% url 'orders:details' order.id %}-->
+{% block content %}
+<div class="history-header">
+    <h1 class="history-title">Order History</h1>
+    <p class="history-subtitle">View all your past orders</p>
+</div>
+
+{% if orders %}
+    {% for order in orders %}
+    <div class="order-card">
+        <div class="order-header">
+            <div class="order-id">Order #{{ order.id }}</div>
+            <span class="order-status {{ order.status }}">
+                {{ order.get_status_display }}
+            </span>
+        </div>
+
+        <div class="order-items">
+            {% for item in order.items.all %}
+            <div class="order-item">
+                <span class="order-item-name">{{ item.item.name }}</span>
+                <span class="order-item-quantity">× {{ item.quantity }}</span>
+                <span class="order-item-price">฿{{ item.subtotal }}</span>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="order-footer">
+            <span class="order-date">{{ order.created_at|date:"M d, Y - H:i" }}</span>
+            <span class="order-total">Total: ฿{{ order.total_price }}</span>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="empty-history">
+        <div class="empty-icon">📋</div>
+        <div class="empty-text">No orders yet</div>
+        <a href="{% url 'menu:list' %}" class="btn">Start Ordering</a>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.tables.models import Table
+from apps.tables.models import Table, DiningSession
 from apps.tables.services import generate_table_qr_code
 
 @admin.register(Table)
@@ -12,3 +12,5 @@ class TableAdmin(admin.ModelAdmin):
             generate_table_qr_code(table)
 
     generate_qr_codes.short_description = "Generate QR codes"
+
+admin.site.register(DiningSession)

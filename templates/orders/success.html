@@ -1,35 +1,161 @@
 {% extends "base.html" %}
-{% block title %}Order Successful{% endblock %}
+
+{% block title %}Order Confirmed{% endblock %}
+
+{% block extra_css %}
+<style>
+    .success-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        text-align: center;
+    }
+
+    .success-icon {
+        font-size: 5rem;
+        margin-bottom: 1rem;
+        animation: scaleIn 0.5s ease-out;
+    }
+
+    @keyframes scaleIn {
+        from {
+            transform: scale(0);
+        }
+        to {
+            transform: scale(1);
+        }
+    }
+
+    .success-title {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        color: #28a745;
+    }
+
+    .order-number {
+        color: #666;
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+    }
+
+    .order-details {
+        background: #fff;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        text-align: left;
+    }
+
+    .order-details-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .order-item:last-child {
+        border-bottom: none;
+    }
+
+    .order-item-name {
+        flex: 1;
+    }
+
+    .order-item-quantity {
+        color: #666;
+        margin: 0 1rem;
+    }
+
+    .order-item-price {
+        font-weight: bold;
+    }
+
+    .order-total {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 2px solid #333;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .action-buttons .btn {
+        min-width: 150px;
+    }
+
+    @media (max-width: 768px) {
+        .success-icon {
+            font-size: 4rem;
+        }
+
+        .success-title {
+            font-size: 1.5rem;
+        }
+
+        .order-item {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .order-item-quantity {
+            margin: 0;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .action-buttons .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container text-center mt-5">
+<div class="success-container">
+    <div class="success-icon">✓</div>
+    <h1 class="success-title">Order Confirmed!</h1>
+    <p class="order-number">Order #{{ order.id }}</p>
 
-    <h1>✅Order Confirmed</h1>
-    <p class="text-muted">Order #{{ order.id }}</p>
+    <div class="order-details">
+        <h2 class="order-details-title">Order Summary</h2>
 
-    <hr>
-
-    <h4>Your Items</h4>
-
-    <ul class="list-group mb-4">
         {% for item in order.items.all %}
-            <li class="list-group-item d-flex justify-content-between">
-                <span>{{ item.item.name }} × {{ item.quantity }}</span>
-                <span>฿{{ item.subtotal }}</span>
-            </li>
+        <div class="order-item">
+            <span class="order-item-name">{{ item.item.name }}</span>
+            <span class="order-item-quantity">× {{ item.quantity }}</span>
+            <span class="order-item-price">฿{{ item.subtotal }}</span>
+        </div>
         {% endfor %}
-    </ul>
 
-    <div style="text-align: right"><h5>Total: ฿{{ order.total_price }}</h5></div>
-
-    <div class="mt-4">
-        <a href="{% url 'menu:list' %}" class="btn btn-outline-primary">
-            Order More
-        </a>
-        <a href="{% url 'orders:history' %}" class="btn btn-primary">
-            View Order History
-        </a>
+        <div class="order-total">
+            <span>Total</span>
+            <span>฿{{ order.total_price }}</span>
+        </div>
     </div>
 
+    <div class="action-buttons">
+        <a href="{% url 'menu:list' %}" class="btn btn-secondary">
+            Order More
+        </a>
+        <a href="{% url 'orders:history' %}" class="btn">
+            View Orders
+        </a>
+    </div>
 </div>
 {% endblock %}

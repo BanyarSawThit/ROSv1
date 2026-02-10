@@ -1,4 +1,4 @@
-#orders/views
+# orders/views
 from decimal import Decimal
 
 from django.shortcuts import render
@@ -9,30 +9,29 @@ from django.db import transaction
 
 from apps.cart import services as cart_services
 from apps.orders.models import OrderItem, Order
-from apps.tables.models import Table
-
-
-def start_order(request, signed_table_id):
-    data = signing.loads(signed_table_id)
-    table = get_object_or_404(Table, id=data["table_id"], is_active=True)
-
-    request.session["table_id"] = table.id
-    return redirect('menu:list')
+from apps.tables.models import Table, DiningSession
+from apps.tables.utils import validate_dining_session
 
 
 @require_POST
 def place_order(request):
+
+    dining_session, redirect_response = validate_dining_session(request)
+    if redirect_response:
+        return redirect_response
+
     table_id = request.session.get('table_id')
     table = get_object_or_404(Table, id=table_id)
+
     summary = cart_services.cart_summary(request.session)
     items = summary['items']
-
     if not items:
         return redirect('cart:details')
 
     with transaction.atomic():
         order = Order.objects.create(
             table = table,
+            dining_session = dining_session,
             status = "pending",
             total_price = Decimal("0.00")
         )
@@ -47,6 +46,7 @@ def place_order(request):
         order.calculate_total()
         cart_services.delete_cart(request.session)
         request.session['last_order_id'] = order.pk
+
     return redirect('orders:success')
 
 
@@ -65,15 +65,14 @@ def order_success(request):
 
 
 def order_history(request):
-    table_id = request.session.get('table_id')
+    dining_session, redirect_response = validate_dining_session(request)
 
-    if not table_id:
-        return redirect('menu:list')
+    if redirect_response:
+        return redirect_response
 
-    # here filtering by status is not the right way i think. maybe like not "paid"?
     orders = (
         Order.objects
-        .filter(table=table_id)
+        .filter(dining_session=dining_session)
         .order_by('-created_at')
         .prefetch_related('items', 'items__item')
     )
